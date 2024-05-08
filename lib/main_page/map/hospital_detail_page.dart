@@ -1,91 +1,85 @@
 import 'package:flutter/material.dart';
 
+import '../../const/hospital_data.dart';
+
 class HospitalDetailPage extends StatelessWidget {
+  final Hospital hospital;
+
+  HospitalDetailPage({required this.hospital});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('병원 이름'),
+        title: Text('병원 상세 정보'),
         centerTitle: true,
       ),
-      body: DefaultTabController(
-        length: 2,
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              constraints: BoxConstraints.expand(height: 200.0),
-              child: Image.asset(
-                'assets/hospital_image.png',
-                fit: BoxFit.cover,
+            // 1. 병원 사진
+            Image.asset(
+              hospital.imageUrl,
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+            SizedBox(height: 20.0),
+            // 2. 병원 이름
+            Text(
+              hospital.name,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: 10.0),
+            // 3. 병원 거리
             Text(
-              '병원 이름',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 5.0),
-            Text(
-              '거리: 1.2km',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              '거리: ${hospital.distance}',
+              style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 10.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '위치',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '위치정보',
-                  ),
-                  SizedBox(height: 10.0),
-                  Container(
-                    height: 200.0, // 일단 공간만 만듭니다.
-                    color: Colors.grey[300], // 지도 위치정보를 나타내는 부분
-                  ),
-                  SizedBox(height: 10.0),
-                  Text(
-                    '영업시간',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '영업시간 정보',
-                  ),
-                  SizedBox(height: 10.0),
-                  Text(
-                    '소개',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '병원 소개글',
-                  ),
-                  SizedBox(height: 10.0),
-                  Text(
-                    '전화번호',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '전화번호 정보',
-                  ),
-                  SizedBox(height: 10.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      // 전화하기 기능 추가
-                    },
-                    child: Text('전화하기'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // 홈페이지 이동 기능 추가
-                    },
-                    child: Text('홈페이지'),
-                  ),
-                ],
-              ),
+            // 4. 병원 위치정보
+            Text(
+              '주소: ${hospital.address}',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 10.0),
+            // 5. 병원 영업시간
+            Text(
+              '운영시간: ${hospital.businessHours}',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 10.0),
+            // 6. 병원 소개글
+            Text(
+              hospital.description,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 10.0),
+            // 7. 병원 전화번호
+            Text(
+              '전화번호: ${hospital.phoneNumber}',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20.0),
+            // 8. 전화하기 기능 버튼
+            ElevatedButton(
+              onPressed: () {
+                // 전화하기 기능 구현
+              },
+              child: Text('전화하기'),
+            ),
+            SizedBox(height: 10.0),
+            // 9. 홈페이지 이동 기능 버튼
+            ElevatedButton(
+              onPressed: () {
+                // 홈페이지 이동 기능 구현
+              },
+              child: Text('홈페이지로 이동'),
             ),
           ],
         ),

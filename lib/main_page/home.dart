@@ -1,6 +1,6 @@
 import 'package:catdogchat/main_page/chatbot_page.dart';
 import 'package:catdogchat/main_page/map/map_page.dart';
-import 'package:catdogchat/main_page/my_page.dart';
+import 'package:catdogchat/main_page/my/my_page.dart';
 import 'package:flutter/material.dart';
 import '../const/tabs.dart';
 
