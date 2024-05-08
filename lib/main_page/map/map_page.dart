@@ -7,6 +7,7 @@ class MapPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('동물병원'),
         centerTitle: true,
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: Icon(Icons.search),

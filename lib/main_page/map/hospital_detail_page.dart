@@ -5,7 +5,10 @@ import '../../const/hospital_data.dart';
 class HospitalDetailPage extends StatelessWidget {
   final Hospital hospital;
 
-  HospitalDetailPage({required this.hospital});
+  HospitalDetailPage({
+    required this.hospital,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +20,7 @@ class HospitalDetailPage extends StatelessWidget {
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // 1. 병원 사진
             Image.asset(

@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import '../../const/hospital_data.dart';
 
 class HospitalInfoPage extends StatelessWidget {
+  HospitalInfoPage({
+    super.key,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,6 +34,10 @@ class HospitalInfoPage extends StatelessWidget {
 }
 
 class HospitalInfoList extends StatelessWidget {
+  HospitalInfoList({
+    super.key,
+  });
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
