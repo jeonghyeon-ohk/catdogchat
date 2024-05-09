@@ -45,8 +45,8 @@ class _Id extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 10.0),
           child: TextField(
             decoration: InputDecoration(
-              labelText: '아이디',
-              hintText: '아이디',
+              labelText: '이메일',
+              hintText: '이메일',
               hintStyle: TextStyle(color: Colors.grey),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),

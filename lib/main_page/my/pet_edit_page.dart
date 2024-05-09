@@ -10,8 +10,6 @@ class _PetEditPageState extends State<PetEditPage> {
   String? _selectedGender;
   String? _selectedNeutered;
   String? _selectedBreed;
-  String? _name;
-  String? _birthDate;
 
   void _selectPetType(String type) {
     setState(() {
@@ -71,11 +69,7 @@ class _PetEditPageState extends State<PetEditPage> {
           children: [
             PetPhotoSection(),
             SizedBox(height: 20),
-            PetNameSection(onChanged: (value) {
-              setState(() {
-                _name = value;
-              });
-            }),
+            PetNameSection(),
             SizedBox(height: 20),
             Row(
               children: [
@@ -100,11 +94,7 @@ class _PetEditPageState extends State<PetEditPage> {
               onTap: _selectBreed,
             ),
             SizedBox(height: 20),
-            PetBirthSection(onChanged: (value) {
-              setState(() {
-                _birthDate = value;
-              });
-            }),
+            PetBirthSection(),
             SizedBox(height: 20),
             PetNeuteredSection(
               selectedNeutered: _selectedNeutered,
@@ -142,10 +132,6 @@ class PetPhotoSection extends StatelessWidget {
 }
 
 class PetNameSection extends StatelessWidget {
-  final Function(String) onChanged;
-
-  const PetNameSection({Key? key, required this.onChanged}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -156,7 +142,6 @@ class PetNameSection extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         TextField(
-          onChanged: onChanged,
           decoration: InputDecoration(
             hintText: '이름을 입력하세요',
             border: OutlineInputBorder(),
@@ -168,10 +153,6 @@ class PetNameSection extends StatelessWidget {
 }
 
 class PetBirthSection extends StatelessWidget {
-  final Function(String) onChanged;
-
-  const PetBirthSection({Key? key, required this.onChanged}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -183,7 +164,6 @@ class PetBirthSection extends StatelessWidget {
         ),
         SizedBox(height: 10),
         TextField(
-          onChanged: onChanged,
           decoration: InputDecoration(
             hintText: '생일을 입력하세요',
             border: OutlineInputBorder(),
