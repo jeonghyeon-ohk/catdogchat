@@ -14,24 +14,23 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Timer(
-      Duration(seconds: 3),
-      () {
-        Navigator.of(context).pushNamed(
-          '/login', /// splash 이미지 재생 후 login 페이지로 이동
-        );
-      },
+      Duration(seconds: 2),
+          () => Navigator.of(context).pushNamed('/login'),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Color(0xFFD0BE9F),
       body: SafeArea(
         bottom: false,
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: 24.0,
+            horizontal: screenWidth * 0.08,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -41,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'parisienne',
-                  fontSize: 70.0,
+                  fontSize: screenWidth * 0.14,  // 동적 폰트 크기
                 ),
               ),
               Text(
@@ -49,14 +48,16 @@ class _SplashScreenState extends State<SplashScreen> {
                 style: TextStyle(
                   color: Colors.white54,
                   fontFamily: 'sunflower',
-                  fontSize: 40.0,
+                  fontSize: screenWidth * 0.08,  // 동적 폰트 크기
                 ),
               ),
               Image.asset(
                 'asset/img/logo.png',
+                width: screenWidth * 0.4,  // 이미지 너비 동적 조절
+                height: screenHeight * 0.4, // 이미지 높이 동적 조절
               ),
               SizedBox(
-                height: 32.0,
+                height: screenHeight * 0.05,
               ),
               CircularProgressIndicator(
                 color: Colors.white,

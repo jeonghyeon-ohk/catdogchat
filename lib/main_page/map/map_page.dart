@@ -13,25 +13,21 @@ class _MapPageState extends State<MapPage> {
   final Completer<NaverMapController> mapControllerCompleter = Completer();
 
   @override
-  initState() {
+  void initState() {
     super.initState();
-
     checkPermission();
   }
 
-  checkPermission() async {
+  void checkPermission() async {
     final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
-
     if (!isLocationEnabled) {
       throw Exception('위치 기능을 활성화 해주세요.');
     }
 
     LocationPermission checkedPermission = await Geolocator.checkPermission();
-
     if (checkedPermission == LocationPermission.denied) {
       checkedPermission = await Geolocator.requestPermission();
     }
-
     if (checkedPermission != LocationPermission.always &&
         checkedPermission != LocationPermission.whileInUse) {
       throw Exception('위치 권한을 허가 해주세요.');
@@ -40,24 +36,25 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double appBarTitleSize = screenWidth * 0.05; // 화면 너비에 상대적인 크기
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('동물병원'),
+        title: Text('동물병원', style: TextStyle(fontSize: appBarTitleSize)),
         centerTitle: true,
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
+            icon: Icon(Icons.search, size: screenWidth * 0.08),
             onPressed: () {
               // 검색 기능 추가
             },
           ),
           IconButton(
-            icon: Icon(Icons.list),
+            icon: Icon(Icons.list, size: screenWidth * 0.08),
             onPressed: () {
-              Navigator.of(context).pushNamed(
-                '/hospital',
-              );
+              Navigator.of(context).pushNamed('/hospital');
             },
           ),
         ],
@@ -65,13 +62,11 @@ class _MapPageState extends State<MapPage> {
       body: NaverMap(
         options: const NaverMapViewOptions(
           initialCameraPosition: NCameraPosition(
-              target: NLatLng(
-                37.5214,
-                126.9246,
-              ),
-              zoom: 13,
-              bearing: 0,
-              tilt: 0),
+            target: NLatLng(37.5214, 126.9246),
+            zoom: 13,
+            bearing: 0,
+            tilt: 0,
+          ),
           indoorEnable: true,
           locationButtonEnable: true,
           consumeSymbolTapEvents: false,
@@ -82,16 +77,16 @@ class _MapPageState extends State<MapPage> {
 
           final marker = NMarker(
               id: 'test',
-              position:
-              const NLatLng(37.506932467450326, 127.05578661133796));
+              position: const NLatLng(37.506932467450326, 127.05578661133796));
           final marker1 = NMarker(
               id: 'test1',
-              position:
-              const NLatLng(37.606932467450326, 127.05578661133796));
+              position: const NLatLng(37.606932467450326, 127.05578661133796));
           controller.addOverlayAll({marker, marker1});
 
-          final onMarkerInfoWindow =
-          NInfoWindow.onMarker(id: marker.info.id, text: "건물");
+          final onMarkerInfoWindow = NInfoWindow.onMarker(
+              id: marker.info.id,
+              text: "건물"
+          );
           marker.openInfoWindow(onMarkerInfoWindow);
         },
       ),

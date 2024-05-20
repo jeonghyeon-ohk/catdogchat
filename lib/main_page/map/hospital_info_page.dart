@@ -1,11 +1,9 @@
-import 'package:catdogchat/main_page/map/hospital_detail_page.dart';
 import 'package:flutter/material.dart';
 import '../../const/hospital_data.dart';
+import 'hospital_detail_page.dart';
 
 class HospitalInfoPage extends StatelessWidget {
-  HospitalInfoPage({
-    super.key,
-  });
+  HospitalInfoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,19 +32,18 @@ class HospitalInfoPage extends StatelessWidget {
 }
 
 class HospitalInfoList extends StatelessWidget {
-  HospitalInfoList({
-    super.key,
-  });
+  HospitalInfoList({super.key});
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width; // 화면의 너비를 기반으로 요소들의 크기 조절
+
     return ListView.builder(
-      itemCount: hospitals.length, // hospitals 리스트의 길이로 아이템 수 설정
+      itemCount: hospitals.length,
       itemBuilder: (context, index) {
-        final hospital = hospitals[index]; // hospitals 리스트에서 해당 인덱스의 병원 정보 가져오기
+        final hospital = hospitals[index];
         return ListTile(
           onTap: () {
-            // 해당 병원의 상세 페이지로 이동
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -55,31 +52,40 @@ class HospitalInfoList extends StatelessWidget {
             );
           },
           leading: CircleAvatar(
-            // 병원 사진
+            // 병원 이미지 설정 및 크기 조절
             backgroundImage: AssetImage(hospital.imageUrl),
+            radius: screenWidth * 0.07, // 화면 너비에 따라 아이콘 크기 조절
           ),
           title: Text(
-            // 병원 이름
             hospital.name,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: screenWidth * 0.04, // 글자 크기를 화면 너비에 따라 조절
+            ),
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                // 운영시간, 주소
                 '운영시간: ${hospital.businessHours}\n주소: ${hospital.address}',
+                style: TextStyle(
+                  fontSize: screenWidth * 0.035, // 화면 너비를 기반으로 글자 크기 조정
+                ),
               ),
               Text(
-                // 거리
                 '거리: ${hospital.distance}',
+                style: TextStyle(
+                  fontSize: screenWidth * 0.035,
+                ),
               ),
             ],
           ),
           trailing: Text(
-            // 예약 가능 여부
             hospital.reservationAvailable ? '예약 가능' : '예약 불가',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: screenWidth * 0.04, // 화면 너비에 따른 글자 크기 조정
+            ),
           ),
         );
       },

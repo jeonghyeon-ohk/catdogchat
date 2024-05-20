@@ -12,59 +12,60 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  '로그인',
-                  style: TextStyle(
-                    fontSize: 25.0,
+        child: SingleChildScrollView(  // 스크롤 가능한 뷰로 변경
+          child: Padding(
+            padding: EdgeInsets.all(screenWidth * 0.05),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    '로그인',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.055,  // 폰트 크기 동적으로 조정
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 20.0,
-              ),
-              _EmailTextField(
-                controller: emailController,
-                onChanged: (_) => _checkInput(),
-              ),
-              SizedBox(height: 20.0),
-              _PasswordTextField(
-                controller: passwordController,
-                onChanged: (_) => _checkInput(),
-              ),
-              SizedBox(height: 20.0),
-              _LoginButton(
-                onPressed: _isInputValid
-                    ? () {
-                        Navigator.of(context).pushNamed(
-                          '/',
-                        );
-                      }
-                    : null,
-              ),
-              SizedBox(height: 10.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pushNamed(
-                        '/join',
-                      );
-                    },
-                    child: Text('회원가입'),
-                  ),
-                ],
-              ),
-            ],
+                SizedBox(
+                  height: screenHeight * 0.02,  // 높이 동적으로 조정
+                ),
+                _EmailTextField(
+                  controller: emailController,
+                  onChanged: (_) => _checkInput(),
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _PasswordTextField(
+                  controller: passwordController,
+                  onChanged: (_) => _checkInput(),
+                ),
+                SizedBox(height: screenHeight * 0.02),
+                _LoginButton(
+                  onPressed: _isInputValid
+                      ? () {
+                    Navigator.of(context).pushNamed('/');
+                  }
+                      : null,
+                ),
+                SizedBox(height: screenHeight * 0.01),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/join');
+                      },
+                      child: Text('회원가입'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

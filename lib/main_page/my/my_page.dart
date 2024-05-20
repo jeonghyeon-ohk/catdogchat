@@ -10,34 +10,31 @@ class MyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '마이페이지',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
+        title: Text('마이페이지', style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenWidth * 0.05)),
       ),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _userInfoSection(sectionDecoration: sectionDecoration),
-            _buildDivider(),
-            _petInfoSection(),
-            _buildDivider(),
-            _userSettingSection(sectionDecoration: sectionDecoration),
+            _userInfoSection(sectionDecoration: sectionDecoration, screenWidth: screenWidth),
+            _buildDivider(screenWidth),
+            _petInfoSection(screenWidth: screenWidth),
+            _buildDivider(screenWidth),
+            _userSettingSection(sectionDecoration: sectionDecoration, screenWidth: screenWidth),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(double screenWidth) {
     return Container(
-      height: 2.0,
+      height: screenWidth * 0.005,
       color: Colors.grey[300],
     );
   }
@@ -45,40 +42,33 @@ class MyPage extends StatelessWidget {
 
 class _userInfoSection extends StatelessWidget {
   final BoxDecoration sectionDecoration;
+  final double screenWidth;
 
   const _userInfoSection({
     required this.sectionDecoration,
+    required this.screenWidth,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 100,
+      height: screenWidth * 0.25,
       decoration: sectionDecoration,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 12.0,
-        ),
+        padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02, horizontal: screenWidth * 0.03),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               'OOO님 안녕하세요!',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+              style: TextStyle(fontSize: screenWidth * 0.05, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 4),
+            SizedBox(height: screenWidth * 0.01),
             Text(
               'qwerty@naver.com',
-              style: TextStyle(
-                color: Colors.grey,
-              ),
+              style: TextStyle(color: Colors.grey, fontSize: screenWidth * 0.04),
             ),
           ],
         ),
@@ -88,70 +78,41 @@ class _userInfoSection extends StatelessWidget {
 }
 
 class _petInfoSection extends StatelessWidget {
-  final BoxDecoration? sectionDecoration;
-  const _petInfoSection({
-    this.sectionDecoration,
-    super.key,
-  });
+  final double screenWidth;
+
+  const _petInfoSection({required this.screenWidth, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              child: Text(
-                '반려동물 0', // 반려동물 수, 실제 데이터 넣어야함.
-                style: TextStyle(
-                  fontSize: 15.0,
-                  fontWeight: FontWeight.bold,
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenWidth * 0.02),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pushNamed('/petEdit'); // 반려동물 추가 페이지로 이동
+        },
+        child: Container(
+          height: screenWidth * 0.2,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(screenWidth * 0.013),
+            border: Border(
+              top: BorderSide(color: Colors.grey[300]!),
+              bottom: BorderSide(color: Colors.grey[300]!),
+            ),
+          ),
+          padding: EdgeInsets.all(screenWidth * 0.02),
+          child: Row(
+            children: [
+              Icon(Icons.add, color: Colors.grey, size: screenWidth * 0.07),
+              SizedBox(width: screenWidth * 0.02),
+              Expanded(
+                child: Text(
+                  '반려동물 추가',
+                  style: TextStyle(color: Colors.grey, fontSize: screenWidth * 0.04),
                 ),
               ),
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).pushNamed(
-                  '/petEdit',
-                );
-                // 반려동물 추가 페이지로 이동
-              },
-              child: Container(
-                height: 75,
-                width: 150,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(
-                    10.0,
-                  ),
-                  border: Border(
-                    top: BorderSide(color: Colors.grey[300]!),
-                    bottom: BorderSide(color: Colors.grey[300]!),
-                  ),
-                ),
-                padding: EdgeInsets.all(8.0), // 좌우 패딩 조정
-                child: Row(
-                  children: [
-                    Icon(Icons.add, color: Colors.grey),
-                    SizedBox(width: 8.0),
-                    Expanded(
-                      // 텍스트가 너무 길어지면 줄바꿈 처리
-                      child: Text(
-                        '반려동물 추가',
-                        style: TextStyle(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -160,8 +121,11 @@ class _petInfoSection extends StatelessWidget {
 
 class _userSettingSection extends StatelessWidget {
   final BoxDecoration sectionDecoration;
+  final double screenWidth;
+
   const _userSettingSection({
     required this.sectionDecoration,
+    required this.screenWidth,
     super.key,
   });
 
@@ -170,73 +134,53 @@ class _userSettingSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SettingItem(
-            title: '회원정보 수정',
-            icon: Icons.navigate_next,
-            onPressed: () {
-              Navigator.of(context).pushNamed(
-                '/editProfile',
-              );
-            },
-          ),
-        ),
-        Divider(), // 구분선 추가
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SettingItem(
-            title: '비밀번호 변경',
-            icon: Icons.navigate_next,
-            onPressed: () {
-              Navigator.of(context).pushNamed(
-                '/password',
-              );
-            },
-          ),
+        SettingItem(
+          title: '회원정보 수정',
+          icon: Icons.navigate_next,
+          onPressed: () => Navigator.of(context).pushNamed('/editProfile'),
+          textColor: Colors.black,
+          fontSize: screenWidth * 0.04,
         ),
         Divider(),
-        SizedBox(height: 8), // 로그아웃과 탈퇴 사이의 간격
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SettingItem(
-            title: '로그아웃',
-            textColor: Colors.grey, // 회색 글자색
-            onPressed: () {
-              Navigator.of(context).pushNamed(
-                '/logout',
-              );
-            },
-          ),
+        SettingItem(
+          title: '비밀번호 변경',
+          icon: Icons.navigate_next,
+          onPressed: () => Navigator.of(context).pushNamed('/password'),
+          textColor: Colors.black,
+          fontSize: screenWidth * 0.04,
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SettingItem(
-            title: '탈퇴',
-            textColor: Colors.grey, // 회색 글자색
-            onPressed: () {
-              Navigator.of(context).pushNamed(
-                '/withdraw',
-              );
-            },
-          ),
+        Divider(),
+        SettingItem(
+          title: '로그아웃',
+          onPressed: () => Navigator.of(context).pushNamed('/logout'),
+          textColor: Colors.grey,
+          fontSize: screenWidth * 0.04,
+        ),
+        SettingItem(
+          title: '탈퇴',
+          onPressed: () => Navigator.of(context).pushNamed('/withdraw'),
+          textColor: Colors.grey,
+          fontSize: screenWidth * 0.04,
         ),
       ],
     );
   }
 }
 
+// SettingItem 위젯을 필요에 따라 설정
 class SettingItem extends StatelessWidget {
   final String title;
   final IconData? icon;
   final Color textColor;
+  final double fontSize;
   final VoidCallback onPressed;
 
   const SettingItem({
     required this.title,
     this.icon,
-    this.textColor = Colors.black,
+    required this.textColor,
     required this.onPressed,
+    required this.fontSize,
     super.key,
   });
 
@@ -245,18 +189,12 @@ class SettingItem extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: EdgeInsets.symmetric(vertical: fontSize * 0.5),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 16.0,
-              ),
-            ),
-            if (icon != null) Icon(icon),
+            Text(title, style: TextStyle(color: textColor, fontSize: fontSize)),
+            if (icon != null) Icon(icon, size: fontSize),
           ],
         ),
       ),

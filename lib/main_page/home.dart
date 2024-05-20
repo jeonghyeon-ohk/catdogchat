@@ -8,6 +8,7 @@ class MainPage extends StatefulWidget {
   @override
   _MainPageState createState() => _MainPageState();
 }
+
 class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   late final TabController controller;
 
@@ -22,48 +23,38 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       setState(() {});
     });
   }
+
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-        body: TabBarView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: controller,
-          children: [
-            ChatbotPage(),
-            MapPage(),
-            MyPage(),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          selectedItemColor: Colors.purple,
-          unselectedItemColor: Colors.grey,
-          currentIndex: controller.index,
-          // showSelectedLabels: false,
-          // showUnselectedLabels: false,
-          // type: BottomNavigationBarType.shifting,
-          onTap: (index){
-            controller.animateTo(index);
-          },
-          items: TABS
-              .map(
-                (e) => BottomNavigationBarItem(
-                  icon: Icon(
-                    e.icon,
-                  ),
-                  label: e.label,
-                ),
-              )
-              .toList(),
-        ),
+    double screenWidth = MediaQuery.of(context).size.width;
+    double iconSize = screenWidth * 0.06; // 아이콘 크기를 약간 더 작게 조정
+    double labelFontSize = screenWidth * 0.035; // 텍스트 크기를 약간 더 작게 조정
+
+    return Scaffold(
+      body: TabBarView(
+        physics: NeverScrollableScrollPhysics(),
+        controller: controller,
+        children: [
+          ChatbotPage(),
+          MapPage(),
+          MyPage(),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        selectedItemColor: Colors.purple,
+        unselectedItemColor: Colors.grey,
+        currentIndex: controller.index,
+        onTap: (index) {
+          controller.animateTo(index);
+        },
+        items: TABS.map((e) => BottomNavigationBarItem(
+          icon: Icon(
+            e.icon,
+            size: iconSize, // 아이콘의 크기를 동적으로 조정
+          ),
+          label: e.label,
+        )).toList(),
       ),
     );
   }
 }
-
-
-
-
-
-

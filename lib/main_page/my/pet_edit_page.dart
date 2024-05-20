@@ -13,31 +13,19 @@ class _PetEditPageState extends State<PetEditPage> {
 
   void _selectPetType(String type) {
     setState(() {
-      if (_selectedPetType == type) {
-        _selectedPetType = null; // 반대쪽을 선택하면 선택 취소
-      } else {
-        _selectedPetType = type;
-      }
+      _selectedPetType = (_selectedPetType == type) ? null : type;
     });
   }
 
   void _selectGender(String gender) {
     setState(() {
-      if (_selectedGender == gender) {
-        _selectedGender = null; // 반대쪽을 선택하면 선택 취소
-      } else {
-        _selectedGender = gender;
-      }
+      _selectedGender = (_selectedGender == gender) ? null : gender;
     });
   }
 
   void _selectNeutered(String neutered) {
     setState(() {
-      if (_selectedNeutered == neutered) {
-        _selectedNeutered = null; // 반대쪽을 선택하면 선택 취소
-      } else {
-        _selectedNeutered = neutered;
-      }
+      _selectedNeutered = (_selectedNeutered == neutered) ? null : neutered;
     });
   }
 
@@ -49,28 +37,30 @@ class _PetEditPageState extends State<PetEditPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('반려동물 수정'),
+        title: Text('반려동물 수정', style: TextStyle(fontSize: screenWidth * 0.05)),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.save),
+            icon: Icon(Icons.save, size: screenWidth * 0.07),
             onPressed: () {
-              // 저장 기능 추가
+              // 저장 기능 구현
             },
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(screenWidth * 0.05),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             PetPhotoSection(),
-            SizedBox(height: 20),
+            SizedBox(height: screenWidth * 0.05),
             PetNameSection(),
-            SizedBox(height: 20),
+            SizedBox(height: screenWidth * 0.05),
             Row(
               children: [
                 Expanded(
@@ -79,7 +69,7 @@ class _PetEditPageState extends State<PetEditPage> {
                     onTap: _selectPetType,
                   ),
                 ),
-                SizedBox(width: 20),
+                SizedBox(width: screenWidth * 0.04),
                 Expanded(
                   child: PetGenderSection(
                     selectedGender: _selectedGender,
@@ -88,14 +78,14 @@ class _PetEditPageState extends State<PetEditPage> {
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            SizedBox(height: screenWidth * 0.05),
             PetBreedSection(
               selectedBreed: _selectedBreed,
               onTap: _selectBreed,
             ),
-            SizedBox(height: 20),
+            SizedBox(height: screenWidth * 0.05),
             PetBirthSection(),
-            SizedBox(height: 20),
+            SizedBox(height: screenWidth * 0.05),
             PetNeuteredSection(
               selectedNeutered: _selectedNeutered,
               onTap: _selectNeutered,
@@ -107,6 +97,7 @@ class _PetEditPageState extends State<PetEditPage> {
   }
 }
 
+// 각 섹션의 위젯 구현 예제
 class PetPhotoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -137,14 +128,135 @@ class PetNameSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          '반려동물 이름',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        Text('반려동물 이름', style: TextStyle(fontWeight: FontWeight.bold)),
         TextField(
           decoration: InputDecoration(
             hintText: '이름을 입력하세요',
             border: OutlineInputBorder(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class PetTypeSection extends StatelessWidget {
+  final String? selectedType;
+  final Function(String) onTap;
+
+  PetTypeSection({this.selectedType, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('반려동물 종류', style: TextStyle(fontWeight: FontWeight.bold)),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => onTap('강아지'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: selectedType == '강아지' ? Colors.blue : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: EdgeInsets.all(10),
+                  child: Center(child: Text('강아지', style: TextStyle(color: selectedType == '강아지' ? Colors.white : Colors.black))),
+                ),
+              ),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => onTap('고양이'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: selectedType == '고양이' ? Colors.blue : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: EdgeInsets.all(10),
+                  child: Center(child: Text('고양이', style: TextStyle(color: selectedType == '고양이' ? Colors.white : Colors.black))),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class PetGenderSection extends StatelessWidget {
+  final String? selectedGender;
+  final Function(String) onTap;
+
+  PetGenderSection({this.selectedGender, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('성별', style: TextStyle(fontWeight: FontWeight.bold)),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => onTap('Male'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: selectedGender == 'Male' ? Colors.blue : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: EdgeInsets.all(10),
+                  child: Text('남아', style: TextStyle(color: selectedGender == 'Male' ? Colors.white : Colors.black)),
+                ),
+              ),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => onTap('Female'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: selectedGender == 'Female' ? Colors.blue : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: EdgeInsets.all(10),
+                  child: Text('여아', style: TextStyle(color: selectedGender == 'Female' ? Colors.white : Colors.black)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class PetBreedSection extends StatelessWidget {
+  final String? selectedBreed;
+  final Function(String) onTap;
+
+  PetBreedSection({this.selectedBreed, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('품종', style: TextStyle(fontWeight: FontWeight.bold)),
+        GestureDetector(
+          onTap: () => onTap('품종 선택'),
+          child: Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Text(selectedBreed ?? '품종을 선택하세요', style: TextStyle(color: Colors.black)),
           ),
         ),
       ],
@@ -158,15 +270,28 @@ class PetBirthSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          '생일',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        Text('생일', style: TextStyle(fontWeight: FontWeight.bold)),
         SizedBox(height: 10),
-        TextField(
-          decoration: InputDecoration(
-            hintText: '생일을 입력하세요',
-            border: OutlineInputBorder(),
+        GestureDetector(
+          onTap: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2000), // 조정 가능
+              lastDate: DateTime.now(),
+            );
+            if (pickedDate != null) {
+              // 선택된 날짜 처리
+            }
+          },
+          child: AbsorbPointer(
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: '생일을 입력하세요',
+                suffixIcon: Icon(Icons.calendar_today),
+                border: OutlineInputBorder(),
+              ),
+            ),
           ),
         ),
       ],
@@ -176,214 +301,48 @@ class PetBirthSection extends StatelessWidget {
 
 class PetNeuteredSection extends StatelessWidget {
   final String? selectedNeutered;
-  final void Function(String) onTap;
+  final Function(String) onTap;
 
-  const PetNeuteredSection({
-    required this.selectedNeutered,
-    required this.onTap,
-    Key? key,
-  }) : super(key: key);
+  PetNeuteredSection({this.selectedNeutered, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          '중성화여부',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 10),
+        Text('중성화 여부', style: TextStyle(fontWeight: FontWeight.bold)),
         Row(
           children: [
             Expanded(
-              child: PetLabel(
-                text: '중성화 완료',
-                isSelected: selectedNeutered == '중성화 완료',
-                onTap: onTap,
-              ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: PetLabel(
-                text: '중성화 전',
-                isSelected: selectedNeutered == '중성화 전',
-                onTap: onTap,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class PetTypeSection extends StatelessWidget {
-  final String? selectedType;
-  final void Function(String) onTap;
-
-  const PetTypeSection({
-    required this.selectedType,
-    required this.onTap,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          '반려동물 종류',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: PetLabel(
-                text: '강아지',
-                isSelected: selectedType == '강아지',
-                onTap: onTap,
-              ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: PetLabel(
-                text: '고양이',
-                isSelected: selectedType == '고양이',
-                onTap: onTap,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class PetGenderSection extends StatelessWidget {
-  final String? selectedGender;
-  final void Function(String) onTap;
-
-  const PetGenderSection({
-    required this.selectedGender,
-    required this.onTap,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          '성별',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: PetLabel(
-                text: '남아',
-                isSelected: selectedGender == '남아',
-                onTap: onTap,
-              ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: PetLabel(
-                text: '여아',
-                isSelected: selectedGender == '여아',
-                onTap: onTap,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class PetBreedSection extends StatelessWidget {
-  final String? selectedBreed;
-  final void Function(String) onTap;
-
-  const PetBreedSection({
-    required this.selectedBreed,
-    required this.onTap,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          '품종',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 10),
-        GestureDetector(
-          onTap: () {
-            // 팝업창 띄우기 기능 추가
-          },
-          child: Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  selectedBreed ?? '품종을 선택하세요',
-                  style: TextStyle(color: Colors.black),
+              child: GestureDetector(
+                onTap: () => onTap('Neutered'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: selectedNeutered == 'Neutered' ? Colors.blue : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: EdgeInsets.all(10),
+                  child: Text('중성화 완료', style: TextStyle(color: selectedNeutered == 'Neutered' ? Colors.white : Colors.black)),
                 ),
-                Icon(Icons.arrow_drop_down),
-              ],
+              ),
             ),
-          ),
+            SizedBox(width: 10),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => onTap('Not Neutered'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: selectedNeutered == 'Not Neutered' ? Colors.blue : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  padding: EdgeInsets.all(10),
+                  child: Text('중성화 전', style: TextStyle(color: selectedNeutered == 'Not Neutered' ? Colors.white : Colors.black)),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
-    );
-  }
-}
-
-class PetLabel extends StatelessWidget {
-  final String text;
-  final bool isSelected;
-  final void Function(String) onTap;
-
-  const PetLabel({
-    required this.text,
-    required this.isSelected,
-    required this.onTap,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onTap(text),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue : Colors.grey[200],
-          borderRadius: BorderRadius.circular(5.0),
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
