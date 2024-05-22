@@ -45,3 +45,4 @@ final List<Hospital> hospitals = [
   ),
   // 나머지 병원 데이터 추가
 ];
+

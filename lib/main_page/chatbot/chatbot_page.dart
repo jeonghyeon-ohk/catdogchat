@@ -52,7 +52,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
         title: Row(
           children: [
             Image.asset(
-              'asset/img/logo.png',
+              'asset/img/logo2.png',
               fit: BoxFit.contain,
               height: screenWidth * 0.07,
             ),
@@ -70,7 +70,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 var message = _messages[index];
                 bool isUser = message['role'] == 'user';
                 return ListTile(
-                  leading: isUser ? null : SizedBox(width: screenWidth * 0.1, child: Image.asset('assets/bot_icon.png')),
+                  leading: isUser ? null : SizedBox(width: screenWidth * 0.1, child: Image.asset('asset/img/logo.png')),
                   title: Align(
                     alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
