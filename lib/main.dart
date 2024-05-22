@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'login/join_page.dart';
 import 'login/login_page.dart';
 import 'main_page/home.dart';
@@ -24,8 +24,9 @@ void main() async {
 // 지도 초기화하기
 Future<void> _initialize() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await NaverMapSdk.instance.initialize(
-      clientId: 'ak8mch1b5s',     // 클라이언트 ID 설정
+      clientId: dotenv.env['NaverMapKey'],     // 클라이언트 ID 설정
       onAuthFailed: (e) => log("네이버맵 인증오류 : $e", name: "onAuthFailed")
   );
 }

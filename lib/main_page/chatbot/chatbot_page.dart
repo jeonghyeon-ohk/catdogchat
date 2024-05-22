@@ -3,9 +3,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(MaterialApp(
     home: ChatbotPage(),
     theme: ThemeData(
@@ -21,8 +24,7 @@ class ChatbotPage extends StatefulWidget {
 }
 
 class _ChatbotPageState extends State<ChatbotPage> {
-  final String apiKey =
-      "sk-proj-9RJWJitV6GK8ihWJKmDRT3BlbkFJ7arCRY4px1KaKXn95w8n";
+  final String? apiKey = dotenv.env['ChatBotKey'];
   final String model = "gpt-4";
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String?>> _messages = [];
@@ -38,17 +40,17 @@ class _ChatbotPageState extends State<ChatbotPage> {
     setState(() {
       _messages.add({
         "role": "assistant",
-        "content": "안녕하세요! 반려동물에 관한 질문이 있으신가요? 도와드릴 수 있어요"
+        "content": "반려동물에 관한 질문이 있으신가요? 도와드릴 수 있어요",
       });
       _messages.add({
         "role": "assistant",
-        "content": "또는 반려동물의 피부 혹은 안구 사진을 첨부해주시면 어떤 질환인지 판단해드릴게요"
+        "content": "또는 반려동물의 피부 혹은 안구 사진을 첨부해주시면 어떤 질환인지 판단해드릴게요",
       });
     });
   }
 
   final String instruction = """
-This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking users. It provides general insights into pets' health based on symptoms or behaviors described in Korean. If a user does not specify the type of pet, the GPT will ask the user to specify the animal type before proceeding with advice. In non-emergency, everyday situations, this GPT will incorporate light humor in its responses to keep the interaction engaging. It offers potential causes and solutions in Korean before suggesting a consultation with a professional for definitive advice. It is essential for the GPT to guide users towards professional help without giving definite diagnoses, ensuring all interactions are in Korean. Additionally, when users ask questions with unclear subjects such as 'What should I eat tonight?' or 'Which exercise would be good?', the GPT will assume the subject is the user's pet and respond accordingly.
+This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking users.It provides general insights into pets' health based on symptoms or behaviors described in Korean. If a user does not specify the type of pet, the GPT will ask the user to specify the animal type before proceeding with advice. In non-emergency, everyday situations, this GPT will incorporate light humor in its responses to keep the interaction engaging. It offers potential causes and solutions in Korean before suggesting a consultation with a professional for definitive advice. It is essential for the GPT to guide users towards professional help without giving definite diagnoses, ensuring all interactions are in Korean. Additionally, when users ask questions with unclear subjects such as 'What should I eat tonight?' or 'Which exercise would be good?', the GPT will assume the subject is the user's pet and respond accordingly.
 """;
 
   Future<void> sendMessage(String content) async {
@@ -71,8 +73,10 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
           "messages": [
             {"role": "system", "content": instruction},
             ..._messages
-                .map((message) =>
-                    {"role": message['role'], "content": message['content']})
+                .map((message) => {
+              "role": message['role'],
+              "content": message['content'],
+            })
                 .toList(),
           ],
           "max_tokens": 1000,
@@ -98,7 +102,10 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
       }
     } catch (e) {
       setState(() {
-        _messages.add({"role": "assistant", "content": "Error: $e"});
+        _messages.add({
+          "role": "assistant",
+          "content": "Error: $e",
+        });
       });
     }
   }
@@ -107,8 +114,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse(
-            'http://13.48.15.160:5000/predict'), // Replace with your AI server's URL
+        Uri.parse('http://13.48.15.160:5000/predict'), // Replace with your AI server's URL
       );
 
       // Convert Uint8List to MultipartFile
@@ -134,7 +140,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
             _messages.add({
               "role": "assistant",
               "content":
-                  "Error: The key 'prediction' was not found in the server response.",
+              "Error: The key 'prediction' was not found in the server response.",
             });
           });
         }
@@ -143,7 +149,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
           _messages.add({
             "role": "assistant",
             "content":
-                "Error: Server responded with status code ${response.statusCode}",
+            "Error: Server responded with status code ${response.statusCode}",
           });
         });
       }
@@ -175,9 +181,9 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
             },
             ..._messages
                 .map((message) => {
-                      'role': message['role'],
-                      'content': message['content'],
-                    })
+              'role': message['role'],
+              'content': message['content'],
+            })
                 .toList(),
           ],
           'max_tokens': 1000,
@@ -199,7 +205,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
           _messages.add({
             "role": "assistant",
             "content":
-                "Error: ${response.reasonPhrase}\n${errorData['error']['message']}",
+            "Error: ${response.reasonPhrase}\n${errorData['error']['message']}",
           });
         });
       }
@@ -212,7 +218,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
 
   Future<void> _pickImage() async {
     final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       final bytes = await pickedFile.readAsBytes();
       setState(() {
@@ -225,12 +231,12 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
     return _selectedImage == null
         ? Container()
         : SizedBox(
-            height: 100,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.memory(_selectedImage!), // Use Image.memory
-            ),
-          );
+      height: 100,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Image.memory(_selectedImage!), // Use Image.memory
+      ),
+    );
   }
 
   @override
@@ -264,11 +270,11 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
                   leading: isUser
                       ? null
                       : SizedBox(
-                          width: screenWidth * 0.1,
-                          child: Image.asset('asset/img/logo.png')),
+                      width: screenWidth * 0.1,
+                      child: Image.asset('asset/img/logo.png')),
                   title: Align(
                     alignment:
-                        isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    isUser ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
                       padding: EdgeInsets.symmetric(
                           vertical: screenWidth * 0.02,
