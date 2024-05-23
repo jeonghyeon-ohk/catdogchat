@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../const/hospital_data.dart'; // 병원 데이터 가져오기
+import 'package:url_launcher/url_launcher.dart';
+import '../../const/hospital_data.dart';
 
 class HospitalDetailPage extends StatelessWidget {
   final Hospital hospital;
@@ -8,6 +9,27 @@ class HospitalDetailPage extends StatelessWidget {
     required this.hospital,
     super.key,
   });
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      throw 'Could not launch $launchUri';
+    }
+  }
+
+  Future<void> _launchWebsite(String url) async {
+    final Uri launchUri = Uri.parse(url);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,11 +93,10 @@ class HospitalDetailPage extends StatelessWidget {
               style: TextStyle(fontSize: screenWidth * 0.04),
             ),
             SizedBox(height: screenHeight * 0.03),
+
             // 전화하기 기능 버튼
             ElevatedButton(
-              onPressed: () {
-                // 여기에 전화하기 기능 구현
-              },
+              onPressed: () => _makePhoneCall(hospital.phoneNumber),
               child: Text('전화하기'),
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(Colors.blue),
@@ -83,11 +104,10 @@ class HospitalDetailPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: screenHeight * 0.02),
-            // 홈페이지 이동 버튼
+
+            // 홈페이지 이동 버튼 (여기서는 병원의 URL 정보가 필요함)
             ElevatedButton(
-              onPressed: () {
-                // 여기에 홈페이지 이동 기능 구현
-              },
+              onPressed: () => _launchWebsite('https://example.com'), // 예시 URL; 실제 URL 정보가 필요함
               child: Text('홈페이지로 이동'),
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(Colors.green),
