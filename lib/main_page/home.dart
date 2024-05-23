@@ -27,8 +27,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double iconSize = screenWidth * 0.06; // 아이콘 크기를 약간 더 작게 조정
-    double labelFontSize = screenWidth * 0.035; // 텍스트 크기를 약간 더 작게 조정
+    double iconSize = screenWidth * 0.06;
+    double labelFontSize = screenWidth * 0.035;
 
     return Scaffold(
       body: TabBarView(
@@ -50,7 +50,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         items: TABS.map((e) => BottomNavigationBarItem(
           icon: Icon(
             e.icon,
-            size: iconSize, // 아이콘의 크기를 동적으로 조정
+            size: iconSize,
           ),
           label: e.label,
         )).toList(),

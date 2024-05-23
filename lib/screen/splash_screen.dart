@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Color(0xFFD0BE9F),
       body: SafeArea(
         bottom: false,
-        child: Center(  // 추가된 Center 위젯으로 모든 자식 요소를 중앙에 배치합니다.
+        child: Center(
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: screenWidth * 0.08,
@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   style: TextStyle(
                     color: Colors.white,
                     fontFamily: 'parisienne',
-                    fontSize: screenWidth * 0.14,  // 동적 폰트 크기
+                    fontSize: screenWidth * 0.14,
                   ),
                 ),
                 Text(
@@ -46,13 +46,13 @@ class _SplashScreenState extends State<SplashScreen> {
                   style: TextStyle(
                     color: Colors.white54,
                     fontFamily: 'sunflower',
-                    fontSize: screenWidth * 0.08,  // 동적 폰트 크기
+                    fontSize: screenWidth * 0.08,
                   ),
                 ),
                 Image.asset(
-                  'asset/img/logo.png',  // 'asset/' 경로를 'assets/'로 수정
-                  width: screenWidth * 0.6,  // 이미지 너비 동적 조절
-                  height: screenHeight * 0.3, // 이미지 높이 동적 조절
+                  'asset/img/logo.png',
+                  width: screenWidth * 0.6,
+                  height: screenHeight * 0.3,
                 ),
                 SizedBox(
                   height: screenHeight * 0.05,

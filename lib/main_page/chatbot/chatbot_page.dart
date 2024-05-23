@@ -59,6 +59,11 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
         "role": "user",
         "content": content,
       });
+      _messageController.clear(); // 입력 필드를 초기화합니다.
+      _messages.add({  // '응답을 기다리는 중입니다...' 메시지를 추가합니다.
+        "role": "assistant",
+        "content": "응답을 기다리는 중입니다...",
+      });
     });
 
     try {
@@ -75,8 +80,9 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
             ..._messages
                 .map((message) => {
               "role": message['role'],
-              "content": message['content'],
+              "content": message['content'] == "응답을 기다리는 중입니다..." ? null : message['content'], // Update message conditionally
             })
+                .where((message) => message['content'] != null)
                 .toList(),
           ],
           "max_tokens": 1000,
@@ -87,6 +93,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
       if (response.statusCode == 200) {
         var data = jsonDecode(utf8.decode(response.bodyBytes));
         setState(() {
+          _messages.removeLast(); // '응답을 기다리는 중입니다...' 메시지를 제거합니다.
           _messages.add({
             "role": "assistant",
             "content": data['choices'][0]['message']['content'].trim(),
@@ -94,6 +101,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
         });
       } else {
         setState(() {
+          _messages.removeLast();
           _messages.add({
             "role": "assistant",
             "content": "Error: ${response.reasonPhrase}",
@@ -102,6 +110,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
       }
     } catch (e) {
       setState(() {
+        _messages.removeLast();
         _messages.add({
           "role": "assistant",
           "content": "Error: $e",
@@ -114,7 +123,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://13.48.15.160:5000/predict'), // Replace with your AI server's URL
+        Uri.parse('http://13.48.15.160:5000/predict'), // Re
       );
 
       // Convert Uint8List to MultipartFile
@@ -323,16 +332,21 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
                 IconButton(
                   icon: Icon(Icons.send, size: screenWidth * 0.07),
                   onPressed: () async {
+                    FocusScope.of(context).unfocus();
                     final content = _messageController.text;
+
+                    // 이미지가 선택되었으면 서버에 이미지 전송
                     if (_selectedImage != null) {
                       await sendImageToAiServer(_selectedImage!);
                       setState(() {
                         _selectedImage = null;
                       });
                     }
+
+                    // 입력된 텍스트가 존재하면 메시지 전송
                     if (content.isNotEmpty) {
                       await sendMessage(content);
-                      _messageController.clear();
+                      _messageController.clear(); // 입력 필드를 초기화
                     }
                   },
                 ),

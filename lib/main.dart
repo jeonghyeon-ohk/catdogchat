@@ -14,14 +14,12 @@ import 'main_page/my/logout.dart';
 import 'main_page/my/pet_edit_page.dart';
 import 'main_page/my/withdraw.dart';
 import 'screen/splash_screen.dart';
-import 'main_page/map/map_page.dart';  // 새로 추가한 지도 페이지 import
+import 'main_page/map/map_page.dart';
 
 void main() async {
   await _initialize();
   runApp(MyApp());
 }
-
-// 지도 초기화하기
 Future<void> _initialize() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
