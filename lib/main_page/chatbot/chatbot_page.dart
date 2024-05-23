@@ -29,6 +29,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, String?>> _messages = [];
   Uint8List? _selectedImage;
+  String _selectedAnimal = '';
+  String _selectedCondition = '';
 
   @override
   void initState() {
@@ -53,20 +55,31 @@ class _ChatbotPageState extends State<ChatbotPage> {
 This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking users.It provides general insights into pets' health based on symptoms or behaviors described in Korean. If a user does not specify the type of pet, the GPT will ask the user to specify the animal type before proceeding with advice. In non-emergency, everyday situations, this GPT will incorporate light humor in its responses to keep the interaction engaging. It offers potential causes and solutions in Korean before suggesting a consultation with a professional for definitive advice. It is essential for the GPT to guide users towards professional help without giving definite diagnoses, ensuring all interactions are in Korean. Additionally, when users ask questions with unclear subjects such as 'What should I eat tonight?' or 'Which exercise would be good?', the GPT will assume the subject is the user's pet and respond accordingly.
 
 if user input data with format{species, disease, probability} then i want you to understand as AI-server says "it seems to pet has disease with this much probability". And after that explain how to manage it.
+
+and you are capable of analyzing image, so if user wants to show you an image you can just tell them show you an image file.
 """;
 
-  Future<void> sendMessage(String content) async {
-    setState(() {
-      _messages.add({
-        "role": "user",
-        "content": content,
+  Future<void> sendMessage(String content, {bool shouldPrint = true}) async {
+    if (shouldPrint) {
+      setState(() {
+        _messages.add({
+          "role": "user",
+          "content": content,
+        });
+        _messageController.clear(); // 입력 필드를 초기화합니다.
+        _messages.add({  // '서버로부터 응답을 기다리는 중입니다...' 메시지를 추가합니다.
+          "role": "assistant",
+          "content": "서버로부터 응답을 기다리는 중입니다...",
+        });
       });
-      _messageController.clear(); // 입력 필드를 초기화합니다.
-      _messages.add({  // '응답을 기다리는 중입니다...' 메시지를 추가합니다.
-        "role": "assistant",
-        "content": "응답을 기다리는 중입니다...",
+    } else {
+      setState(() {
+        _messages.add({  // '서버로부터 응답을 기다리는 중입니다...' 메시지를 추가합니다.
+          "role": "assistant",
+          "content": "서버로부터 응답을 기다리는 중입니다...",
+        });
       });
-    });
+    }
 
     try {
       var response = await http.post(
@@ -82,7 +95,7 @@ if user input data with format{species, disease, probability} then i want you to
             ..._messages
                 .map((message) => {
               "role": message['role'],
-              "content": message['content'] == "응답을 기다리는 중입니다..." ? null : message['content'], // Update message conditionally
+              "content": message['content'] == "서버로부터 응답을 기다리는 중입니다..." ? null : message['content'], // Update message conditionally
             })
                 .where((message) => message['content'] != null)
                 .toList(),
@@ -95,7 +108,7 @@ if user input data with format{species, disease, probability} then i want you to
       if (response.statusCode == 200) {
         var data = jsonDecode(utf8.decode(response.bodyBytes));
         setState(() {
-          _messages.removeLast(); // '응답을 기다리는 중입니다...' 메시지를 제거합니다.
+          _messages.removeLast(); // '서버로부터 응답을 기다리는 중입니다...' 메시지를 제거합니다.
           _messages.add({
             "role": "assistant",
             "content": data['choices'][0]['message']['content'].trim(),
@@ -122,10 +135,21 @@ if user input data with format{species, disease, probability} then i want you to
   }
 
   Future<void> sendImageToAiServer(Uint8List image) async {
+    String url;
+    if (_selectedAnimal == '강아지') {
+      url = _selectedCondition == '피부'
+          ? 'http://13.48.15.160:5000/predictdogskin'
+          : 'http://13.48.15.160:5000/predictdogeye';
+    } else {
+      url = _selectedCondition == '피부'
+          ? 'http://13.48.15.160:5000/predictcatskin'
+          : 'http://13.48.15.160:5000/predictcateye';
+    }
+
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://13.48.15.160:5000/predictcatskin'), // Replace with your AI server's URL
+        Uri.parse(url), // Dynamic URL based on user selection
       );
 
       // Convert Uint8List to MultipartFile
@@ -175,9 +199,9 @@ if user input data with format{species, disease, probability} then i want you to
 
   Future<void> sendMessageToGpt(String aiServerResponse) async {
     setState(() {
-      _messages.add({  // '응답을 기다리는 중입니다...' 메시지를 추가합니다.
+      _messages.add({  // '서버로부터 응답을 기다리는 중입니다...' 메시지를 추가합니다.
         "role": "assistant",
-        "content": "응답을 기다리는 중입니다...",
+        "content": "서버로부터 응답을 기다리는 중입니다...",
       });
     });
 
@@ -198,13 +222,7 @@ if user input data with format{species, disease, probability} then i want you to
             {
               'role': 'user',
               'content': aiServerResponse,
-            },
-            ..._messages
-                .map((message) => {
-              'role': message['role'],
-              'content': message['content'],
-            })
-                .toList(),
+            },  //여기 지금 콤마가 있어도 되는지 모르겠음 혹시 안되면 지워
           ],
           'max_tokens': 1000,
           'temperature': 0.5,
@@ -214,7 +232,7 @@ if user input data with format{species, disease, probability} then i want you to
       if (response.statusCode == 200) {
         var data = jsonDecode(utf8.decode(response.bodyBytes));
         setState(() {
-          _messages.removeLast(); // '응답을 기다리는 중입니다...' 메시지를 제거합니다.
+          _messages.removeLast(); // '서버로부터 응답을 기다리는 중입니다...' 메시지를 제거합니다.
           _messages.add({
             "role": "assistant",
             "content": data['choices'][0]['message']['content'].trim(),
@@ -242,8 +260,87 @@ if user input data with format{species, disease, probability} then i want you to
   }
 
   Future<void> _pickImage() async {
-    final pickedFile =
-    await ImagePicker().pickImage(source: ImageSource.gallery);
+    await _showAnimalSelectionDialog();
+  }
+
+  Future<void> _showAnimalSelectionDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('동물 선택'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Image.asset('asset/img/dog_icon.png', width: 40, height: 40),
+                title: Text('강아지'),
+                onTap: () {
+                  setState(() {
+                    _selectedAnimal = '강아지';
+                  });
+                  Navigator.of(context).pop();
+                  _showConditionSelectionDialog();
+                },
+              ),
+              ListTile(
+                leading: Image.asset('asset/img/cat_icon.png', width: 40, height: 40),
+                title: Text('고양이'),
+                onTap: () {
+                  setState(() {
+                    _selectedAnimal = '고양이';
+                  });
+                  Navigator.of(context).pop();
+                  _showConditionSelectionDialog();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showConditionSelectionDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('질환 유형 선택'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.pets, size: 40, color: Colors.brown),
+                title: Text('피부'),
+                onTap: () async {
+                  setState(() {
+                    _selectedCondition = '피부';
+                  });
+                  Navigator.of(context).pop();
+                  await _pickImageFromGallery();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.remove_red_eye, size: 40, color: Colors.blue),
+                title: Text('안구'),
+                onTap: () async {
+                  setState(() {
+                    _selectedCondition = '안구';
+                  });
+                  Navigator.of(context).pop();
+                  await _pickImageFromGallery();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       final bytes = await pickedFile.readAsBytes();
       setState(() {
@@ -298,12 +395,10 @@ if user input data with format{species, disease, probability} then i want you to
                       width: screenWidth * 0.1,
                       child: Image.asset('asset/img/logo.png')),
                   title: Align(
-                    alignment:
-                    isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
                       padding: EdgeInsets.symmetric(
-                          vertical: screenWidth * 0.02,
-                          horizontal: screenWidth * 0.04),
+                          vertical: screenWidth * 0.02, horizontal: screenWidth * 0.04),
                       decoration: BoxDecoration(
                         color: isUser ? Colors.blue[300] : Colors.grey[200],
                         borderRadius: BorderRadius.circular(20),
@@ -330,8 +425,7 @@ if user input data with format{species, disease, probability} then i want you to
                     controller: _messageController,
                     decoration: InputDecoration(
                       hintText: '반려동물의 상태를 문의해 주세요!',
-                      hintStyle: TextStyle(
-                          fontSize: screenWidth * 0.035), // 조절된 힌트 글씨 크기
+                      hintStyle: TextStyle(fontSize: screenWidth * 0.035), // 조절된 힌트 글씨 크기
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
@@ -357,11 +451,8 @@ if user input data with format{species, disease, probability} then i want you to
                       setState(() {
                         _selectedImage = null;
                       });
-                    }
-
-                    // 입력된 텍스트가 존재하면 메시지 전송
-                    if (content.isNotEmpty) {
-                      await sendMessage(content);
+                    } else if (content.isNotEmpty) {
+                      await sendMessage(content, shouldPrint: true);
                       _messageController.clear(); // 입력 필드를 초기화
                     }
                   },
