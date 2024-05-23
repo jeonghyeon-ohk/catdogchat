@@ -51,6 +51,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
   final String instruction = """
 This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking users.It provides general insights into pets' health based on symptoms or behaviors described in Korean. If a user does not specify the type of pet, the GPT will ask the user to specify the animal type before proceeding with advice. In non-emergency, everyday situations, this GPT will incorporate light humor in its responses to keep the interaction engaging. It offers potential causes and solutions in Korean before suggesting a consultation with a professional for definitive advice. It is essential for the GPT to guide users towards professional help without giving definite diagnoses, ensuring all interactions are in Korean. Additionally, when users ask questions with unclear subjects such as 'What should I eat tonight?' or 'Which exercise would be good?', the GPT will assume the subject is the user's pet and respond accordingly.
+
+if user input data with format{species, disease, probability} then i want you to understand as AI-server says "it seems to pet has disease with this much probability". And after that explain how to manage it.
 """;
 
   Future<void> sendMessage(String content) async {
@@ -123,7 +125,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://13.48.15.160:5000/predict'), // Re
+        Uri.parse('http://13.48.15.160:5000/predictcatskin'), // Replace with your AI server's URL
       );
 
       // Convert Uint8List to MultipartFile
@@ -141,15 +143,18 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
 
         // Ensure the 'prediction' key exists in the response
         if (data.containsKey('prediction')) {
-          String aiServerResponse = data['prediction'];
+          String aiServerResponseSpecies = data['species'];
+          String aiServerResponsePrediction = data['prediction'];
+          String aiServerResponseProb = data['percentage'];
+
+          String combinedResponse = "{$aiServerResponseSpecies, $aiServerResponsePrediction, $aiServerResponseProb}";
           // Send AI server response to GPT-4
-          await handleServerResponse(aiServerResponse);
+          await sendMessageToGpt(combinedResponse);
         } else {
           setState(() {
             _messages.add({
               "role": "assistant",
-              "content":
-              "Error: The key 'prediction' was not found in the server response.",
+              "content": "Error: The key 'prediction' was not found in the server response.",
             });
           });
         }
@@ -157,8 +162,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
         setState(() {
           _messages.add({
             "role": "assistant",
-            "content":
-            "Error: Server responded with status code ${response.statusCode}",
+            "content": "Error: Server responded with status code ${response.statusCode}",
           });
         });
       }
@@ -169,9 +173,12 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
     }
   }
 
-  Future<void> handleServerResponse(String aiServerResponse) async {
+  Future<void> sendMessageToGpt(String aiServerResponse) async {
     setState(() {
-      _messages.add({"role": "user", "content": aiServerResponse});
+      _messages.add({  // '응답을 기다리는 중입니다...' 메시지를 추가합니다.
+        "role": "assistant",
+        "content": "응답을 기다리는 중입니다...",
+      });
     });
 
     try {
@@ -188,6 +195,10 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
               'role': 'system',
               'content': instruction,
             },
+            {
+              'role': 'user',
+              'content': aiServerResponse,
+            },
             ..._messages
                 .map((message) => {
               'role': message['role'],
@@ -203,6 +214,7 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
       if (response.statusCode == 200) {
         var data = jsonDecode(utf8.decode(response.bodyBytes));
         setState(() {
+          _messages.removeLast(); // '응답을 기다리는 중입니다...' 메시지를 제거합니다.
           _messages.add({
             "role": "assistant",
             "content": data['choices'][0]['message']['content'].trim(),
@@ -211,16 +223,20 @@ This GPT, the Pet Health Assistant, is specifically designed for Korean-speaking
       } else {
         var errorData = jsonDecode(utf8.decode(response.bodyBytes));
         setState(() {
+          _messages.removeLast();
           _messages.add({
             "role": "assistant",
-            "content":
-            "Error: ${response.reasonPhrase}\n${errorData['error']['message']}",
+            "content": "Error: ${response.reasonPhrase}\n${errorData['error']['message']}",
           });
         });
       }
     } catch (e) {
       setState(() {
-        _messages.add({"role": "assistant", "content": "Error: $e"});
+        _messages.removeLast();
+        _messages.add({
+          "role": "assistant",
+          "content": "Error: $e",
+        });
       });
     }
   }
