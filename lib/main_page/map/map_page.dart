@@ -4,6 +4,8 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'hospital_info_page.dart';
 import 'search_page.dart';
+import '../../const/hospital_data.dart'; // 병원 데이터 모델을 사용하기 위한 임포트
+import 'load_hospital_data.dart'; // 병원 데이터 로드 함수를 사용하기 위한 임포트
 
 class MapPage extends StatefulWidget {
   @override
@@ -12,8 +14,11 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   final Completer<NaverMapController> mapControllerCompleter = Completer();
+  NaverMapController? _mapController;
   Position? _currentPosition;
   late StreamSubscription<Position> _positionStreamSubscription;
+  List<Hospital> allHospitals = []; // 전체 병원 데이터를 저장할 리스트
+  List<Hospital> hospitals = []; // 현재 보이는 지도 영역의 병원 데이터를 저장할 리스트
 
   @override
   void initState() {
@@ -57,13 +62,14 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _updateCameraPosition(Position position) async {
-    final controller = await mapControllerCompleter.future;
-    controller.updateCamera(
-      NCameraUpdate.withParams(
-        target: NLatLng(position.latitude, position.longitude),
-        zoom: 13,
-      ),
-    );
+    if (_mapController != null) {
+      _mapController!.updateCamera(
+        NCameraUpdate.withParams(
+          target: NLatLng(position.latitude, position.longitude),
+          zoom: 13,
+        ),
+      );
+    }
   }
 
   void _getCurrentLocation() async {
@@ -71,10 +77,67 @@ class _MapPageState extends State<MapPage> {
       _currentPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      setState(() {});
+      setState(() {
+        if (_currentPosition != null) {
+          final currentLatLng = NLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+          loadHospitals(currentLatLng);
+        }
+      });
     } catch (e) {
       print('위치를 가져오는데 실패했습니다: $e');
     }
+  }
+
+  void loadHospitals(NLatLng currentPosition) async {
+    try {
+      allHospitals = await loadCsvData(currentPosition);
+      setState(() {});
+      _filterHospitalsInView(); // 지도를 로드할 때도 화면에 보이는 병원만 필터링
+    } catch (e) {
+      print('병원 데이터를 로드하는데 실패했습니다: $e');
+    }
+  }
+
+  void _filterHospitalsInView() async {
+    if (_mapController == null) return;
+    final bounds = await _mapController!.getContentBounds();
+
+    final filteredHospitals = allHospitals.where((hospital) {
+      return hospital.xCoordinate >= bounds.southWest.latitude &&
+          hospital.xCoordinate <= bounds.northEast.latitude &&
+          hospital.yCoordinate >= bounds.southWest.longitude &&
+          hospital.yCoordinate <= bounds.northEast.longitude;
+    }).toList();
+
+    setState(() {
+      hospitals = filteredHospitals;
+    });
+    _addMarkers();
+  }
+
+  void _addMarkers() async {
+    if (_mapController == null) return;
+    _mapController!.clearOverlays();
+    for (var hospital in hospitals) {
+      final marker = NMarker(
+        id: hospital.name,
+        position: NLatLng(hospital.xCoordinate, hospital.yCoordinate),
+      );
+
+      marker.setOnTapListener((NMarker marker) {
+        final onMarkerInfoWindow = NInfoWindow.onMarker(
+          id: marker.info.id,
+          text: hospital.name,
+        );
+        marker.openInfoWindow(onMarkerInfoWindow);
+      });
+
+      _mapController!.addOverlay(marker);
+    }
+  }
+
+  void _searchInCurrentView() async {
+    _filterHospitalsInView();
   }
 
   @override
@@ -84,10 +147,13 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _navigateToSearchPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SearchPage()),
-    );
+    if (_currentPosition != null) {
+      final currentLatLng = NLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SearchPage(currentPosition: currentLatLng)),
+      );
+    }
   }
 
   @override
@@ -113,10 +179,9 @@ class _MapPageState extends State<MapPage> {
               : NaverMap(
             options: NaverMapViewOptions(
               initialCameraPosition: NCameraPosition(
-                target: NLatLng(
-                  _currentPosition!.latitude,
-                  _currentPosition!.longitude,
-                ),
+                target: _currentPosition != null
+                    ? NLatLng(_currentPosition!.latitude, _currentPosition!.longitude)
+                    : NLatLng(37.5665, 126.9780), // 기본 위치를 서울 시청으로 설정
                 zoom: 13,
                 bearing: 0,
                 tilt: 0,
@@ -126,9 +191,12 @@ class _MapPageState extends State<MapPage> {
               consumeSymbolTapEvents: false,
             ),
             onMapReady: (NaverMapController controller) async {
+              _mapController = controller;
               mapControllerCompleter.complete(controller);
               if (_currentPosition != null) {
                 _updateCameraPosition(_currentPosition!);
+                final currentLatLng = NLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+                loadHospitals(currentLatLng);
               }
             },
           ),
@@ -137,22 +205,34 @@ class _MapPageState extends State<MapPage> {
             minChildSize: 0.1,
             maxChildSize: 0.8,
             builder: (BuildContext context, ScrollController scrollController) {
-              return Container(
-                height: screenHeight * 0.8, // 높이를 화면의 80%로 설정
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, -2),
-                      blurRadius: 5.0,
-                    ),
-                  ],
-                ),
-                child: HospitalInfoPage(scrollController: scrollController),
-              );
+              if (_currentPosition != null) {
+                final currentLatLng = NLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
+                return Container(
+                  height: screenHeight * 0.8, // 높이를 화면의 80%로 설정
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        offset: Offset(0, -2),
+                        blurRadius: 5.0,
+                      ),
+                    ],
+                  ),
+                  child: HospitalInfoPage(scrollController: scrollController, currentPosition: currentLatLng),
+                );
+              }
+              return Container();
             },
+          ),
+          Positioned(
+            top: 10,
+            left: 10,
+            child: ElevatedButton(
+              onPressed: _searchInCurrentView,
+              child: Text('현 지도에서 검색'),
+            ),
           ),
         ],
       ),

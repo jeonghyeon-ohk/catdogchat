@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import '../../const/hospital_data.dart';
 import 'hospital_detail_page.dart';
 import 'load_hospital_data.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart'; // NLatLng 사용을 위해 추가
 
 class SearchPage extends StatefulWidget {
+  final NLatLng currentPosition;
+
+  SearchPage({required this.currentPosition});
+
   @override
   _SearchPageState createState() => _SearchPageState();
 }
@@ -21,7 +26,7 @@ class _SearchPageState extends State<SearchPage> {
 
   // 병원 데이터 로딩 함수
   void loadHospitalData() async {
-    _allHospitals = await loadCsvData();
+    _allHospitals = await loadCsvData(widget.currentPosition);
     setState(() {
       _searchResults = _allHospitals; // 초기 상태에 모든 병원을 표시
     });
