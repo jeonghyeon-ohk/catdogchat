@@ -6,6 +6,7 @@ import 'hospital_info_page.dart';
 import 'search_page.dart';
 import '../../const/hospital_data.dart'; // 병원 데이터 모델을 사용하기 위한 임포트
 import 'load_hospital_data.dart'; // 병원 데이터 로드 함수를 사용하기 위한 임포트
+import 'hospital_detail_page.dart'; // 병원 상세 페이지로 이동하기 위한 임포트
 
 class MapPage extends StatefulWidget {
   @override
@@ -122,17 +123,27 @@ class _MapPageState extends State<MapPage> {
       final marker = NMarker(
         id: hospital.name,
         position: NLatLng(hospital.xCoordinate, hospital.yCoordinate),
+        icon: NOverlayImage.fromAssetImage('asset/img/logo2.png'), // 마커 이미지 설정
+        size: Size(20, 20),
+        caption: NOverlayCaption(
+          text: hospital.name,
+          textSize: 11.0,
+          color: Colors.black,
+          minZoom: 13,
+          maxZoom: 21,
+          //requestWidth: 0,
+        ),
       );
+      _mapController!.addOverlay(marker);
 
       marker.setOnTapListener((NMarker marker) {
-        final onMarkerInfoWindow = NInfoWindow.onMarker(
-          id: marker.info.id,
-          text: hospital.name,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HospitalDetailPage(hospital: hospital),
+          ),
         );
-        marker.openInfoWindow(onMarkerInfoWindow);
       });
-
-      _mapController!.addOverlay(marker);
     }
   }
 
@@ -159,10 +170,21 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('동물병원'),
+        title: Row(
+          children: [
+            Image.asset(
+              'asset/img/logo2.png',
+              fit: BoxFit.contain,
+              height: screenWidth * 0.07,
+            ),
+            SizedBox(width: screenWidth * 0.02),
+            Text('동물병원', style: TextStyle(fontSize: screenWidth * 0.05)),
+          ],
+        ),
         centerTitle: true,
         automaticallyImplyLeading: false,
         actions: [
@@ -205,33 +227,39 @@ class _MapPageState extends State<MapPage> {
             minChildSize: 0.1,
             maxChildSize: 0.8,
             builder: (BuildContext context, ScrollController scrollController) {
-              if (_currentPosition != null) {
-                final currentLatLng = NLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-                return Container(
-                  height: screenHeight * 0.8, // 높이를 화면의 80%로 설정
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        offset: Offset(0, -2),
-                        blurRadius: 5.0,
-                      ),
-                    ],
-                  ),
-                  child: HospitalInfoPage(scrollController: scrollController, currentPosition: currentLatLng),
-                );
-              }
-              return Container();
+              return Container(
+                height: screenHeight * 0.8, // 높이를 화면의 80%로 설정
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      offset: Offset(0, -2),
+                      blurRadius: 5.0,
+                    ),
+                  ],
+                ),
+                child: HospitalInfoPage(
+                  scrollController: scrollController,
+                  hospitals: hospitals, // 필터링된 병원 데이터를 전달
+                ),
+              );
             },
           ),
           Positioned(
             top: 10,
-            left: 10,
-            child: ElevatedButton(
-              onPressed: _searchInCurrentView,
-              child: Text('현 지도에서 검색'),
+            left: 0,
+            right: 0,
+            child: Center(
+              child: ElevatedButton(
+                onPressed: _searchInCurrentView,
+                child: Text('현 지도에서 검색'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  textStyle: TextStyle(fontSize: 12),
+                ),
+              ),
             ),
           ),
         ],

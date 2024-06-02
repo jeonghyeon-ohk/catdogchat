@@ -14,7 +14,18 @@ class MyPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('마이페이지', style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenWidth * 0.05)),
+        title: Row(
+          children: [
+            Image.asset(
+              'asset/img/logo2.png',
+              fit: BoxFit.contain,
+              height: screenWidth * 0.07,
+            ),
+            SizedBox(width: screenWidth * 0.02),
+            Text('마이페이지', style: TextStyle(fontSize: screenWidth * 0.05)),
+          ],
+        ),
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Column(

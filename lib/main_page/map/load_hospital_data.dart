@@ -30,8 +30,8 @@ Future<List<Hospital>> loadCsvData(NLatLng currentPosition) async {
             address: address,
             phoneNumber: phoneNumber,
             distance: (distanceInMeters / 1000).toStringAsFixed(1) + ' km',
-            reservationAvailable: true, // 예제에서는 상태를 그대로 true로 설정합니다.
-            imageUrl: 'assets/hospital_image.png', // 적절한 이미지 URL 경로로 조정 필요
+            reservationAvailable: true,
+            imageUrl: 'asset/img/logo.png',
             businessHours: '영업 시간 정보를 사용할 수 없습니다.', // 운영시간 정보 필드 추가 필요
             description: '병원에 대한 자세한 설명이 여기 들어갑니다.', // 설명 추가 필요
             xCoordinate: hospitalLatitude,
