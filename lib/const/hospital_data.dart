@@ -1,14 +1,14 @@
 class Hospital {
-  final String name; // 병원 이름
-  final String address; // 주소
-  final String phoneNumber; // 전화번호
-  final String distance; // 거리
-  final bool reservationAvailable; // 예약 가능 여부
-  final String imageUrl; // 이미지 URL
-  final String businessHours; // 영업 시간
-  final String description; // 설명
-  final double xCoordinate; // X 좌표
-  final double yCoordinate; // Y 좌표
+  final String name;
+  final String address;
+  final String phoneNumber;
+  final String distance;
+  final bool reservationAvailable;
+  final String imageUrl;
+  final String businessHours;
+  final String description;
+  final double xCoordinate;
+  final double yCoordinate;
 
   Hospital({
     required this.name,

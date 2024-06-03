@@ -30,6 +30,8 @@ class HospitalInfoPage extends StatelessWidget {
           },
           leading: CircleAvatar(
             backgroundImage: AssetImage(hospital.imageUrl),
+            radius: 30,
+            foregroundColor: Colors.grey,
           ),
           title: Text(hospital.name, style: TextStyle(fontWeight: FontWeight.bold)),
           subtitle: Text('주소: ${hospital.address}\n거리: ${hospital.distance}'),
