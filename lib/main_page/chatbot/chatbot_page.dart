@@ -1,10 +1,13 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,14 +70,16 @@ and you are capable of analyzing image, so if user wants to show you an image yo
           "content": content,
         });
         _messageController.clear(); // 입력 필드를 초기화합니다.
-        _messages.add({  // '서버로부터 응답을 기다리는 중입니다...' 메시지를 추가합니다.
+        _messages.add({
+          // '서버로부터 응답을 기다리는 중입니다...' 메시지를 추가합니다.
           "role": "assistant",
           "content": "서버로부터 응답을 기다리는 중입니다...",
         });
       });
     } else {
       setState(() {
-        _messages.add({  // '서버로부터 응답을 기다리는 중입니다...' 메시지를 추가합니다.
+        _messages.add({
+          // '서버로부터 응답을 기다리는 중입니다...' 메시지를 추가합니다.
           "role": "assistant",
           "content": "서버로부터 응답을 기다리는 중입니다...",
         });
@@ -95,7 +100,9 @@ and you are capable of analyzing image, so if user wants to show you an image yo
             ..._messages
                 .map((message) => {
               "role": message['role'],
-              "content": message['content'] == "서버로부터 응답을 기다리는 중입니다..." ? null : message['content'], // Update message conditionally
+              "content": message['content'] == "서버로부터 응답을 기다리는 중입니다..."
+                  ? null
+                  : message['content'], // Update message conditionally
             })
                 .where((message) => message['content'] != null)
                 .toList(),
@@ -138,12 +145,12 @@ and you are capable of analyzing image, so if user wants to show you an image yo
     String url;
     if (_selectedAnimal == '강아지') {
       url = _selectedCondition == '피부'
-          ? 'http://13.48.15.160:5000/predictdogskin'
-          : 'http://13.48.15.160:5000/predictdogeye';
+          ? 'http://13.48.15.160:5000/predict_dogskin'
+          : 'http://13.48.15.160:5000/predict_dogeyes';
     } else {
       url = _selectedCondition == '피부'
-          ? 'http://13.48.15.160:5000/predictcatskin'
-          : 'http://13.48.15.160:5000/predictcateye';
+          ? 'http://13.48.15.160:5000/predict_catskin'
+          : 'http://13.48.15.160:5000/predict_cateyes';
     }
 
     try {
@@ -169,16 +176,19 @@ and you are capable of analyzing image, so if user wants to show you an image yo
         if (data.containsKey('prediction')) {
           String aiServerResponseSpecies = data['species'];
           String aiServerResponsePrediction = data['prediction'];
-          String aiServerResponseProb = data['percentage'];
+          double aiServerResponseProb = data['probabilities'];
+          String aiServerResponseProbString = aiServerResponseProb.toString();
 
-          String combinedResponse = "{$aiServerResponseSpecies, $aiServerResponsePrediction, $aiServerResponseProb}";
+          String combinedResponse =
+              "{$aiServerResponseSpecies, $aiServerResponsePrediction, $aiServerResponseProbString}";
           // Send AI server response to GPT-4
           await sendMessageToGpt(combinedResponse);
         } else {
           setState(() {
             _messages.add({
               "role": "assistant",
-              "content": "Error: The key 'prediction' was not found in the server response.",
+              "content":
+              "Error: The key 'prediction' was not found in the server response.",
             });
           });
         }
@@ -186,7 +196,8 @@ and you are capable of analyzing image, so if user wants to show you an image yo
         setState(() {
           _messages.add({
             "role": "assistant",
-            "content": "Error: Server responded with status code ${response.statusCode}",
+            "content":
+            "Error: Server responded with status code ${response.statusCode}",
           });
         });
       }
@@ -199,7 +210,8 @@ and you are capable of analyzing image, so if user wants to show you an image yo
 
   Future<void> sendMessageToGpt(String aiServerResponse) async {
     setState(() {
-      _messages.add({  // '서버로부터 응답을 기다리는 중입니다...' 메시지를 추가합니다.
+      _messages.add({
+        // '서버로부터 응답을 기다리는 중입니다...' 메시지를 추가합니다.
         "role": "assistant",
         "content": "서버로부터 응답을 기다리는 중입니다...",
       });
@@ -222,7 +234,7 @@ and you are capable of analyzing image, so if user wants to show you an image yo
             {
               'role': 'user',
               'content': aiServerResponse,
-            },  //여기 지금 콤마가 있어도 되는지 모르겠음 혹시 안되면 지워
+            }, //여기 지금 콤마가 있어도 되는지 모르겠음 혹시 안되면 지워
           ],
           'max_tokens': 1000,
           'temperature': 0.5,
@@ -244,7 +256,8 @@ and you are capable of analyzing image, so if user wants to show you an image yo
           _messages.removeLast();
           _messages.add({
             "role": "assistant",
-            "content": "Error: ${response.reasonPhrase}\n${errorData['error']['message']}",
+            "content":
+            "Error: ${response.reasonPhrase}\n${errorData['error']['message']}",
           });
         });
       }
@@ -273,7 +286,8 @@ and you are capable of analyzing image, so if user wants to show you an image yo
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Image.asset('asset/img/dog_icon.png', width: 40, height: 40),
+                leading: Image.asset('asset/img/dog_icon.png',
+                    width: 40, height: 40),
                 title: Text('강아지'),
                 onTap: () {
                   setState(() {
@@ -284,7 +298,8 @@ and you are capable of analyzing image, so if user wants to show you an image yo
                 },
               ),
               ListTile(
-                leading: Image.asset('asset/img/cat_icon.png', width: 40, height: 40),
+                leading: Image.asset('asset/img/cat_icon.png',
+                    width: 40, height: 40),
                 title: Text('고양이'),
                 onTap: () {
                   setState(() {
@@ -322,7 +337,8 @@ and you are capable of analyzing image, so if user wants to show you an image yo
                 },
               ),
               ListTile(
-                leading: Icon(Icons.remove_red_eye, size: 40, color: Colors.blue),
+                leading:
+                Icon(Icons.remove_red_eye, size: 40, color: Colors.blue),
                 title: Text('안구'),
                 onTap: () async {
                   setState(() {
@@ -340,14 +356,66 @@ and you are capable of analyzing image, so if user wants to show you an image yo
   }
 
   Future<void> _pickImageFromGallery() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
     if (pickedFile != null) {
-      final bytes = await pickedFile.readAsBytes();
-      setState(() {
-        _selectedImage = bytes;
-      });
+      print("\n\n\nthis is where cropping started\n\n\n");
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        aspectRatioPresets: [
+          CropAspectRatioPreset.square,
+          CropAspectRatioPreset.ratio3x2,
+          CropAspectRatioPreset.original,
+          CropAspectRatioPreset.ratio4x3,
+          CropAspectRatioPreset.ratio16x9
+        ],
+        uiSettings: [
+          AndroidUiSettings(
+              toolbarTitle: 'Crop Image',
+              toolbarColor: Colors.deepOrange,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.original,
+              lockAspectRatio: false,
+              hideBottomControls: true,
+              showCropGrid: true,
+              cropFrameColor: Colors.white,
+              cropGridColor: Colors.red),
+          IOSUiSettings(
+            title: 'Cropper',
+            minimumAspectRatio: 1.0,
+            aspectRatioLockEnabled: true,
+            rotateButtonsHidden: false,
+            rotateClockwiseButtonHidden: true,
+            aspectRatioLockDimensionSwapEnabled: true,
+            resetAspectRatioEnabled: false,
+            doneButtonTitle: 'Finish',
+            cancelButtonTitle: 'Cancel',
+            resetButtonHidden: true,
+          )
+        ],
+      );
+
+      if (croppedFile != null) {
+        print("\n\n\ncrop failed\n\n\n");
+        final bytes = await croppedFile.readAsBytes();
+        setState(() {
+          _selectedImage = bytes;
+        });
+      }
     }
   }
+
+
+  // Future<void> _pickImageFromGallery() async {
+  //   final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+  //   if (pickedFile != null) {
+  //     final bytes = await pickedFile.readAsBytes();
+  //     setState(() {
+  //       _selectedImage = bytes;
+  //     });
+  //   }
+  // }
 
   Widget _buildImagePreview() {
     return _selectedImage == null
@@ -395,10 +463,12 @@ and you are capable of analyzing image, so if user wants to show you an image yo
                       width: screenWidth * 0.1,
                       child: Image.asset('asset/img/logo.png')),
                   title: Align(
-                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment:
+                    isUser ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
                       padding: EdgeInsets.symmetric(
-                          vertical: screenWidth * 0.02, horizontal: screenWidth * 0.04),
+                          vertical: screenWidth * 0.02,
+                          horizontal: screenWidth * 0.04),
                       decoration: BoxDecoration(
                         color: isUser ? Colors.blue[300] : Colors.grey[200],
                         borderRadius: BorderRadius.circular(20),
@@ -425,7 +495,8 @@ and you are capable of analyzing image, so if user wants to show you an image yo
                     controller: _messageController,
                     decoration: InputDecoration(
                       hintText: '반려동물의 상태를 문의해 주세요!',
-                      hintStyle: TextStyle(fontSize: screenWidth * 0.035), // 조절된 힌트 글씨 크기
+                      hintStyle: TextStyle(fontSize: screenWidth * 0.035),
+                      // 조절된 힌트 글씨 크기
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
