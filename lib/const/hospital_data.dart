@@ -9,6 +9,8 @@ class Hospital {
   final String description;
   final double xCoordinate;
   final double yCoordinate;
+  final String locationInfo; // 위치정보 추가
+  final String website; // 홈페이지 추가
 
   Hospital({
     required this.name,
@@ -21,5 +23,7 @@ class Hospital {
     required this.description,
     required this.xCoordinate,
     required this.yCoordinate,
+    required this.locationInfo, // 위치정보 추가
+    required this.website, // 홈페이지 추가
   });
 }

@@ -70,6 +70,7 @@ flutter:
     - asset/img/
     - .env # path to your .env file
     - asset/hospital_info/
+    - asset/img/hospital/
 
 
   fonts:

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import '../../const/hospital_data.dart';
 import 'hospital_detail_page.dart';
-import 'load_hospital_data.dart';
-import 'package:flutter_naver_map/flutter_naver_map.dart'; // NLatLng 사용을 위해 추가
+import 'package:url_launcher/url_launcher.dart'; // 전화 기능을 위해 추가
 
 class SearchPage extends StatefulWidget {
+  final List<Hospital> hospitals;
   final NLatLng currentPosition;
 
-  SearchPage({required this.currentPosition});
+  SearchPage({required this.hospitals, required this.currentPosition});
 
   @override
   _SearchPageState createState() => _SearchPageState();
@@ -21,24 +22,39 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    loadHospitalData(); // 데이터 로딩
+    _allHospitals = widget.hospitals; // 초기 상태에 MapPage에서 전달된 병원 데이터를 설정
+    _searchResults = _allHospitals;
   }
 
-  // 병원 데이터 로딩 함수
-  void loadHospitalData() async {
-    _allHospitals = await loadCsvData(widget.currentPosition);
-    setState(() {
-      _searchResults = _allHospitals; // 초기 상태에 모든 병원을 표시
-    });
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      throw 'Could not launch $launchUri';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-
+    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text('병원 검색'),
+        title: Row(
+          children: [
+            Image.asset(
+              'asset/img/logo2.png',
+              fit: BoxFit.contain,
+              height: screenWidth * 0.07,
+            ),
+            SizedBox(width: screenWidth * 0.02),
+            Text('병원 검색', style: TextStyle(fontSize: screenWidth * 0.05)),
+          ],
+        ),
         centerTitle: true,
       ),
       body: Column(
@@ -80,11 +96,15 @@ class _SearchPageState extends State<SearchPage> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('운영시간: ${hospital.businessHours}\n주소: ${hospital.address}'),
+                      Text('주소: ${hospital.address}'),
                       Text('거리: ${hospital.distance}'),
+                      Text('전화번호: ${hospital.phoneNumber}'),
                     ],
                   ),
-                  trailing: Text(hospital.reservationAvailable ? '예약 가능' : '예약 불가'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.phone),
+                    onPressed: () => _makePhoneCall(hospital.phoneNumber),
+                  ),
                 );
               },
             ),
@@ -98,7 +118,8 @@ class _SearchPageState extends State<SearchPage> {
     final query = _searchController.text.toLowerCase();
     setState(() {
       _searchResults = _allHospitals
-          .where((hospital) => hospital.name.toLowerCase().contains(query)).toList();
+          .where((hospital) => hospital.name.toLowerCase().contains(query))
+          .toList();
     });
   }
 }

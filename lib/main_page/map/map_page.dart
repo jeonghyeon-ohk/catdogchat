@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'hospital_detail_page.dart';
 import 'hospital_info_page.dart';
 import 'search_page.dart';
 import '../../const/hospital_data.dart'; // 병원 데이터 모델을 사용하기 위한 임포트
 import 'load_hospital_data.dart'; // 병원 데이터 로드 함수를 사용하기 위한 임포트
-import 'hospital_detail_page.dart'; // 병원 상세 페이지로 이동하기 위한 임포트
 
 class MapPage extends StatefulWidget {
   @override
@@ -131,7 +131,6 @@ class _MapPageState extends State<MapPage> {
           color: Colors.black,
           minZoom: 13,
           maxZoom: 21,
-          //requestWidth: 0,
         ),
       );
       _mapController!.addOverlay(marker);
@@ -158,33 +157,19 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _navigateToSearchPage(BuildContext context) {
-    if (_currentPosition != null) {
-      final currentLatLng = NLatLng(_currentPosition!.latitude, _currentPosition!.longitude);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SearchPage(currentPosition: currentLatLng)),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SearchPage(hospitals: hospitals, currentPosition: NLatLng(_currentPosition!.latitude, _currentPosition!.longitude))),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Image.asset(
-              'asset/img/logo2.png',
-              fit: BoxFit.contain,
-              height: screenWidth * 0.07,
-            ),
-            SizedBox(width: screenWidth * 0.02),
-            Text('동물병원', style: TextStyle(fontSize: screenWidth * 0.05)),
-          ],
-        ),
+        title: Text('동물병원'),
         centerTitle: true,
         automaticallyImplyLeading: false,
         actions: [
@@ -257,7 +242,7 @@ class _MapPageState extends State<MapPage> {
                 child: Text('현 지도에서 검색'),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  textStyle: TextStyle(fontSize: 12),
+                  textStyle: TextStyle(fontSize: 11),
                 ),
               ),
             ),

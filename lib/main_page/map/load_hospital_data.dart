@@ -3,7 +3,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
 import '../../const/hospital_data.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart'; // NLatLng 사용을 위해 추가
-import 'dart:io'; // File 존재 여부 확인을 위해 추가
 
 Future<List<Hospital>> loadCsvData(NLatLng currentPosition) async {
   try {
@@ -14,20 +13,22 @@ Future<List<Hospital>> loadCsvData(NLatLng currentPosition) async {
     List<Hospital> hospitals = [];
 
     for (var data in listData) {
-      if (data.length >= 30) { // 데이터 길이가 충분한 경우에만 처리
+      if (data.length >= 32) { // 데이터 길이가 충분한 경우에만 처리
         try {
           String name = data[18]; // 사업장명
           String address = data[16]; // 도로명주소
           String phoneNumber = data[12]; // 전화번호
           double hospitalLatitude = double.parse(data[23].toString()); // 좌표정보(X)
           double hospitalLongitude = double.parse(data[24].toString()); // 좌표정보(Y)
-          String businessHours = data.sublist(29).join('\n'); // 진료시간 (마지막 인덱스부터 끝까지)
+          String businessHours = data[30]; // 진료시간
+          String locationInfo = data[31]; // 위치정보
+          String website = data[32]; // 홈페이지
 
           NLatLng hospitalPosition = NLatLng(hospitalLatitude, hospitalLongitude);
           double distanceInMeters = currentPosition.distanceTo(hospitalPosition);
 
           // 이미지 경로 설정
-          String imageUrl = 'asset/img/$name.png';
+          String imageUrl = 'asset/img/hospital/$name.png';
           bool imageExists;
           try {
             await rootBundle.load(imageUrl);
@@ -51,10 +52,12 @@ Future<List<Hospital>> loadCsvData(NLatLng currentPosition) async {
             description: '병원에 대한 자세한 설명이 여기 들어갑니다.', // 설명 추가 필요
             xCoordinate: hospitalLatitude,
             yCoordinate: hospitalLongitude,
+            locationInfo: locationInfo, // 위치정보 추가
+            website: website, // 홈페이지 추가
           ));
 
           // 로그 출력
-          print('Name: $name, Address: $address, Phone Number: $phoneNumber, Latitude: $hospitalLatitude, Longitude: $hospitalLongitude, Business Hours: $businessHours, Distance: ${(distanceInMeters / 1000).toStringAsFixed(1)} km, Image URL: $imageUrl');
+          print('Name: $name, Address: $address, Phone Number: $phoneNumber, Latitude: $hospitalLatitude, Longitude: $hospitalLongitude, Business Hours: $businessHours, Distance: ${(distanceInMeters / 1000).toStringAsFixed(1)} km, Image URL: $imageUrl, Location Info: $locationInfo, Website: $website');
         } catch (e) {
           print("유효하지 않은 좌표 데이터가 포함된 행을 건너뜁니다: $data");
         }

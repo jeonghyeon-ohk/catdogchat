@@ -23,6 +23,15 @@ class HospitalDetailPage extends StatelessWidget {
     }
   }
 
+  Future<void> _launchWebsite(String url) async {
+    final Uri launchUri = Uri.parse(url);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -30,9 +39,19 @@ class HospitalDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          hospital.name,
-          style: TextStyle(fontSize: screenWidth * 0.05),
+        title: Row(
+          children: [
+            Image.asset(
+              'asset/img/logo2.png',
+              fit: BoxFit.contain,
+              height: screenWidth * 0.07,
+            ),
+            SizedBox(width: screenWidth * 0.02),
+            Text(
+              hospital.name,
+              style: TextStyle(fontSize: screenWidth * 0.05),
+            ),
+          ],
         ),
         centerTitle: true, // AppBar 타이틀 가운데 정렬
       ),
@@ -60,8 +79,8 @@ class HospitalDetailPage extends StatelessWidget {
             ),
             SizedBox(height: screenHeight * 0.03),
             // 병원 정보
-            _buildInfoRow(screenWidth, screenHeight, '거리', hospital.distance),
-            _buildInfoRow(screenWidth, screenHeight, '위치', hospital.address),
+            _buildInfoRow(screenWidth, screenHeight, '거리', hospital.distance, showDivider: false),
+            _buildInfoRow(screenWidth, screenHeight, '주소', hospital.address),
             SizedBox(height: screenHeight * 0.02),
             // 병원 위치 지도
             Container(
@@ -85,16 +104,18 @@ class HospitalDetailPage extends StatelessWidget {
                       color: Colors.black,
                       minZoom: 13,
                       maxZoom: 21,
-                      //requestWidth: 0,
                     ),
                   );
                   controller.addOverlay(marker);
                 },
               ),
             ),
-            SizedBox(height: screenHeight * 0.02),
-            _buildInfoRow(screenWidth, screenHeight, '영업시간', hospital.businessHours),
-            _buildInfoRow(screenWidth, screenHeight, '전화번호', hospital.phoneNumber),
+            if (hospital.locationInfo.isNotEmpty)
+              SizedBox(height: screenHeight * 0.02),
+            if (hospital.locationInfo.isNotEmpty)
+              _buildInfoRow(screenWidth, screenHeight, '위치 정보', hospital.locationInfo),
+            _buildInfoRow(screenWidth, screenHeight, '운영시간', '\n' + hospital.businessHours),
+            _buildInfoRow(screenWidth, screenHeight, '전화번호', hospital.phoneNumber, showDivider: false),
             SizedBox(height: screenHeight * 0.04),
             // 전화하기 기능 버튼
             ElevatedButton(
@@ -115,15 +136,36 @@ class HospitalDetailPage extends StatelessWidget {
                 ),
               ),
             ),
+            if (hospital.website.isNotEmpty)
+              SizedBox(height: screenHeight * 0.02),
+            if (hospital.website.isNotEmpty)
+              ElevatedButton(
+                onPressed: () => _launchWebsite(hospital.website),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: screenHeight * 0.015),
+                  child: Text(
+                    '홈페이지 방문하기',
+                    style: TextStyle(fontSize: screenWidth * 0.045),
+                  ),
+                ),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.green),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(double screenWidth, double screenHeight, String title, String info) {
+  Widget _buildInfoRow(double screenWidth, double screenHeight, String title, String info, {bool showDivider = true}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
+      padding: EdgeInsets.symmetric(vertical: screenHeight * 0.015),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -149,6 +191,7 @@ class HospitalDetailPage extends StatelessWidget {
             ),
           ),
           SizedBox(height: screenHeight * 0.01),
+          if (showDivider) Divider(thickness: 1, color: Colors.grey.withOpacity(0.5)),
         ],
       ),
     );
